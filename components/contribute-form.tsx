@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { CATEGORIES, ERAS } from "@/lib/data"
+import { CATEGORIES, ERAS } from "@/lib/content-types"
 import { CheckCircle2 } from "lucide-react"
 
 export function ContributeForm() {

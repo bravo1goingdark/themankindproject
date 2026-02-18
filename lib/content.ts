@@ -1,10 +1,11 @@
 import "server-only"
 
-import fs from "fs"
+import { promises as fs } from "fs"
 import path from "path"
 import matter from "gray-matter"
 import { remark } from "remark"
 import html from "remark-html"
+import sanitizeHtml from "sanitize-html"
 import type { Category, Entry, EntryFrontmatter, EntryMetadata } from "./content-types"
 import { CATEGORIES, ERAS } from "./content-types"
 
@@ -15,15 +16,37 @@ export { CATEGORIES, ERAS }
 
 let cachedMetadata: Map<string, EntryMetadata> | null = null
 let cachedSlugs: string[] | null = null
+let dirExistsCache: boolean | null = null
 
 function clearCache(): void {
   cachedMetadata = null
   cachedSlugs = null
+  dirExistsCache = null
 }
 
 async function markdownToHtml(markdown: string): Promise<string> {
   const result = await remark().use(html).process(markdown)
-  return result.toString()
+  const rawHtml = result.toString()
+  
+  return sanitizeHtml(rawHtml, {
+    allowedTags: [
+      'p', 'br', 'strong', 'em', 'b', 'i', 'u',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li',
+      'a', 'blockquote', 'code', 'pre',
+      'hr', 'span', 'div'
+    ],
+    allowedAttributes: {
+      'a': ['href', 'title'],
+      'span': ['class'],
+      'div': ['class'],
+      'code': ['class'],
+    },
+    allowedSchemes: ['https', 'http', 'mailto'],
+    transformTags: {
+      'a': sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer', target: '_blank' })
+    }
+  })
 }
 
 function validateFrontmatter(data: unknown): EntryFrontmatter {
@@ -83,36 +106,47 @@ function extractSection(content: string, sectionName: string): string {
   return match ? match[1].trim() : ""
 }
 
-export function getEntrySlugs(): string[] {
+export async function getEntrySlugs(): Promise<string[]> {
   if (cachedSlugs) {
     return cachedSlugs
   }
 
-  if (!fs.existsSync(contentDirectory)) {
+  if (dirExistsCache === null) {
+    try {
+      await fs.access(contentDirectory)
+      dirExistsCache = true
+    } catch {
+      dirExistsCache = false
+    }
+  }
+
+  if (!dirExistsCache) {
     cachedSlugs = []
     return cachedSlugs
   }
 
-  cachedSlugs = fs
-    .readdirSync(contentDirectory)
+  const files = await fs.readdir(contentDirectory)
+  cachedSlugs = files
     .filter((file) => file.endsWith(".md"))
     .map((file) => file.replace(/\.md$/, ""))
 
   return cachedSlugs
 }
 
-export function getEntryMetadata(slug: string): EntryMetadata | null {
+export async function getEntryMetadata(slug: string): Promise<EntryMetadata | null> {
   if (cachedMetadata?.has(slug)) {
     return cachedMetadata.get(slug)!
   }
 
   const filePath = path.join(contentDirectory, `${slug}.md`)
   
-  if (!fs.existsSync(filePath)) {
+  let fileContents: string
+  try {
+    fileContents = await fs.readFile(filePath, "utf8")
+  } catch {
     return null
   }
 
-  const fileContents = fs.readFileSync(filePath, "utf8")
   const { data, content } = matter(fileContents)
   const frontmatter = validateFrontmatter(data)
   
@@ -133,24 +167,26 @@ export function getEntryMetadata(slug: string): EntryMetadata | null {
   return metadata
 }
 
-export function getAllEntriesMetadata(): EntryMetadata[] {
-  const slugs = getEntrySlugs()
-  const entries = slugs
-    .map((slug) => getEntryMetadata(slug))
+export async function getAllEntriesMetadata(): Promise<EntryMetadata[]> {
+  const slugs = await getEntrySlugs()
+  const entries = await Promise.all(
+    slugs.map((slug) => getEntryMetadata(slug))
+  )
+  return entries
     .filter((entry): entry is EntryMetadata => entry !== null)
     .sort((a, b) => b.year - a.year)
-  
-  return entries
 }
 
 export async function getEntryBySlug(slug: string): Promise<Entry | null> {
   const filePath = path.join(contentDirectory, `${slug}.md`)
   
-  if (!fs.existsSync(filePath)) {
+  let fileContents: string
+  try {
+    fileContents = await fs.readFile(filePath, "utf8")
+  } catch {
     return null
   }
 
-  const fileContents = fs.readFileSync(filePath, "utf8")
   const { data, content } = matter(fileContents)
   const frontmatter = validateFrontmatter(data)
 
@@ -185,7 +221,7 @@ export async function getEntryBySlug(slug: string): Promise<Entry | null> {
 }
 
 export async function getAllEntries(): Promise<Entry[]> {
-  const slugs = getEntrySlugs()
+  const slugs = await getEntrySlugs()
   const entries = await Promise.all(
     slugs.map((slug) => getEntryBySlug(slug))
   )
@@ -194,37 +230,37 @@ export async function getAllEntries(): Promise<Entry[]> {
     .sort((a, b) => b.year - a.year)
 }
 
-export function getEntriesByCategory(category: Category): EntryMetadata[] {
-  const allEntries = getAllEntriesMetadata()
+export async function getEntriesByCategory(category: Category): Promise<EntryMetadata[]> {
+  const allEntries = await getAllEntriesMetadata()
   return allEntries.filter((entry) => entry.category === category)
 }
 
-export function getEntriesByEra(era: string): EntryMetadata[] {
-  const allEntries = getAllEntriesMetadata()
+export async function getEntriesByEra(era: string): Promise<EntryMetadata[]> {
+  const allEntries = await getAllEntriesMetadata()
   return allEntries.filter((entry) => entry.era === era)
 }
 
-export function getEntriesByRegion(region: string): EntryMetadata[] {
-  const allEntries = getAllEntriesMetadata()
+export async function getEntriesByRegion(region: string): Promise<EntryMetadata[]> {
+  const allEntries = await getAllEntriesMetadata()
   return allEntries.filter((entry) => entry.region === region)
 }
 
-export function getEntriesByTag(tag: string): EntryMetadata[] {
-  const allEntries = getAllEntriesMetadata()
+export async function getEntriesByTag(tag: string): Promise<EntryMetadata[]> {
+  const allEntries = await getAllEntriesMetadata()
   return allEntries.filter((entry) => 
     entry.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
   )
 }
 
-export function getEntriesByYearRange(startYear: number, endYear: number): EntryMetadata[] {
-  const allEntries = getAllEntriesMetadata()
+export async function getEntriesByYearRange(startYear: number, endYear: number): Promise<EntryMetadata[]> {
+  const allEntries = await getAllEntriesMetadata()
   return allEntries.filter((entry) => 
     entry.year >= startYear && entry.year <= endYear
   )
 }
 
-export function getRelatedEntries(current: EntryMetadata, count = 3): EntryMetadata[] {
-  const allEntries = getAllEntriesMetadata()
+export async function getRelatedEntries(current: EntryMetadata, count = 3): Promise<EntryMetadata[]> {
+  const allEntries = await getAllEntriesMetadata()
   
   const scored = allEntries
     .filter((entry) => entry.slug !== current.slug)
@@ -251,11 +287,11 @@ export function getRelatedEntries(current: EntryMetadata, count = 3): EntryMetad
   return scored
 }
 
-export function searchEntries(query: string): EntryMetadata[] {
+export async function searchEntries(query: string): Promise<EntryMetadata[]> {
   const normalizedQuery = query.toLowerCase().trim()
   if (!normalizedQuery) return []
 
-  const allEntries = getAllEntriesMetadata()
+  const allEntries = await getAllEntriesMetadata()
   
   return allEntries.filter((entry) => {
     const searchableText = [
@@ -271,8 +307,8 @@ export function searchEntries(query: string): EntryMetadata[] {
   })
 }
 
-export function getStatistics() {
-  const allEntries = getAllEntriesMetadata()
+export async function getStatistics() {
+  const allEntries = await getAllEntriesMetadata()
   
   const categoryCount: Record<string, number> = {}
   const eraCount: Record<string, number> = {}

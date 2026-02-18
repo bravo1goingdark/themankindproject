@@ -6,6 +6,7 @@ import type { Entry, EntryMetadata } from "@/lib/content"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { AchievementCard } from "@/components/achievement-card-new"
+import { CATEGORY_COLORS, formatYear } from "@/lib/constants"
 import {
   ArrowLeft,
   MapPin,
@@ -15,26 +16,6 @@ import {
   Flame,
   BarChart3,
 } from "lucide-react"
-
-const categoryColors: Record<string, string> = {
-  science: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  engineering: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  courage: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-  medicine: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  exploration: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-}
-
-const categoryBarColors: Record<string, string> = {
-  science: "bg-blue-400",
-  engineering: "bg-amber-400",
-  courage: "bg-rose-400",
-  medicine: "bg-emerald-400",
-  exploration: "bg-cyan-400",
-}
-
-function formatYear(year: number): string {
-  return year < 0 ? `${Math.abs(year)} BC` : `${year}`
-}
 
 export function EntryContent({
   entry,
@@ -66,7 +47,7 @@ export function EntryContent({
             <div className="flex items-center gap-3">
               <Badge
                 variant="outline"
-                className={`text-[10px] font-medium uppercase tracking-wider ${categoryColors[entry.category] || ""}`}
+                className={`text-[10px] font-medium uppercase tracking-wider ${CATEGORY_COLORS[entry.category]?.badge || ""}`}
               >
                 {entry.category}
               </Badge>
@@ -109,7 +90,7 @@ export function EntryContent({
               icon={BarChart3}
               label="Impact"
               score={entry.impact_score}
-              color={categoryBarColors[entry.category] || "bg-accent"}
+              color={CATEGORY_COLORS[entry.category]?.bar || "bg-accent"}
             />
             <ScoreChip
               icon={Flame}
@@ -183,7 +164,7 @@ export function EntryContent({
                   <SidebarRow label="Category">
                     <Badge
                       variant="outline"
-                      className={`text-[10px] font-medium uppercase tracking-wider ${categoryColors[entry.category] || ""}`}
+                      className={`text-[10px] font-medium uppercase tracking-wider ${CATEGORY_COLORS[entry.category]?.badge || ""}`}
                     >
                       {entry.category}
                     </Badge>
@@ -198,7 +179,7 @@ export function EntryContent({
                     label="Impact"
                     score={entry.impact_score}
                     color={
-                      categoryBarColors[entry.category] || "bg-accent"
+                      CATEGORY_COLORS[entry.category]?.bar || "bg-accent"
                     }
                   />
                   <ScoreBar

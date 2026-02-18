@@ -3,15 +3,8 @@
 import { Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { CATEGORIES, type Category } from "@/lib/content-types"
+import { CATEGORY_DOT_COLORS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
-
-const categoryColors: Record<string, string> = {
-  science: "bg-blue-500",
-  engineering: "bg-amber-500",
-  courage: "bg-rose-500",
-  medicine: "bg-emerald-500",
-  exploration: "bg-cyan-500",
-}
 
 interface SearchFiltersProps {
   search: string
@@ -79,7 +72,7 @@ export function SearchFilters({
               <span
                 className={cn(
                   "size-1.5 rounded-full",
-                  categoryColors[cat.value]
+                  CATEGORY_DOT_COLORS[cat.value]
                 )}
               />
               {cat.label}

@@ -1,14 +1,7 @@
 import Link from "next/link"
 import type { EntryMetadata } from "@/lib/content"
 import { Badge } from "@/components/ui/badge"
-
-const categoryColors: Record<string, string> = {
-  science: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  engineering: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  courage: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-  medicine: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  exploration: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-}
+import { CATEGORY_COLORS, formatYear } from "@/lib/constants"
 
 export function AchievementCard({
   entry,
@@ -21,14 +14,12 @@ export function AchievementCard({
         <div className="flex items-center justify-between gap-3">
           <Badge
             variant="outline"
-            className={`text-[10px] font-medium uppercase tracking-wider ${categoryColors[entry.category] || ""}`}
+            className={`text-[10px] font-medium uppercase tracking-wider ${CATEGORY_COLORS[entry.category]?.badge || ""}`}
           >
             {entry.category}
           </Badge>
           <span className="shrink-0 text-xs font-mono text-muted-foreground">
-            {entry.year < 0
-              ? `${Math.abs(entry.year)} BC`
-              : entry.year}
+            {formatYear(entry.year)}
           </span>
         </div>
         <h3 className="mt-3 text-base font-semibold leading-snug text-foreground group-hover:text-accent transition-colors">

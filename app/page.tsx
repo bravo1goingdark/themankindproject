@@ -2,8 +2,8 @@ import { Hero } from "@/components/hero"
 import { AchievementGrid } from "@/components/achievement-grid-new"
 import { getAllEntriesMetadata } from "@/lib/content"
 
-export default function Page() {
-  const entries = getAllEntriesMetadata()
+export default async function Page() {
+  const entries = await getAllEntriesMetadata()
   
   return (
     <>

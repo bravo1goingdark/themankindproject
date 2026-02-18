@@ -8,7 +8,7 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const slugs = getEntrySlugs()
+  const slugs = await getEntrySlugs()
   return slugs.map((slug) => ({ slug }))
 }
 
@@ -27,7 +27,7 @@ export default async function EntryPage({ params }: Props) {
   const entry = await getEntryBySlug(slug)
   if (!entry) notFound()
 
-  const related = getRelatedEntries(entry)
+  const related = await getRelatedEntries(entry)
 
   return <EntryContent entry={entry} related={related} />
 }

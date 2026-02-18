@@ -1,8 +1,9 @@
-import { achievements, CATEGORIES } from "@/lib/data"
+import { getAllEntriesMetadata, CATEGORIES } from "@/lib/content"
 
-export function Hero() {
+export async function Hero() {
+  const entries = await getAllEntriesMetadata()
   const categoryCount = CATEGORIES.length
-  const eraCount = new Set(achievements.map((a) => a.era)).size
+  const eraCount = new Set(entries.map((e) => e.era)).size
 
   return (
     <section className="mx-auto max-w-6xl px-6 pt-20 pb-12">
@@ -14,7 +15,7 @@ export function Hero() {
         across science, engineering, medicine, courage, and exploration.
       </p>
       <div className="mt-8 flex items-center gap-6">
-        <Stat value={achievements.length} label="Entries" />
+        <Stat value={entries.length} label="Entries" />
         <Separator />
         <Stat value={categoryCount} label="Categories" />
         <Separator />
