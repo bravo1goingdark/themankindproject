@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npx tsx scripts/validate-content.ts && npx tsx scripts/build-search-index.ts && next build",
     "start": "next start",
     "lint": "eslint .",
-    "convert": "npx tsx scripts/convert-to-md.ts"
+    "convert": "npx tsx scripts/convert-to-md.ts",
+    "build:index": "npx tsx scripts/build-search-index.ts",
+    "validate": "npx tsx scripts/validate-content.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

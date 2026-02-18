@@ -13,6 +13,14 @@ const contentDirectory = path.join(process.cwd(), "content")
 export type { Category, Entry, EntryFrontmatter, EntryMetadata }
 export { CATEGORIES, ERAS }
 
+let cachedMetadata: Map<string, EntryMetadata> | null = null
+let cachedSlugs: string[] | null = null
+
+function clearCache(): void {
+  cachedMetadata = null
+  cachedSlugs = null
+}
+
 async function markdownToHtml(markdown: string): Promise<string> {
   const result = await remark().use(html).process(markdown)
   return result.toString()
@@ -76,16 +84,28 @@ function extractSection(content: string, sectionName: string): string {
 }
 
 export function getEntrySlugs(): string[] {
-  if (!fs.existsSync(contentDirectory)) {
-    return []
+  if (cachedSlugs) {
+    return cachedSlugs
   }
-  return fs
+
+  if (!fs.existsSync(contentDirectory)) {
+    cachedSlugs = []
+    return cachedSlugs
+  }
+
+  cachedSlugs = fs
     .readdirSync(contentDirectory)
     .filter((file) => file.endsWith(".md"))
     .map((file) => file.replace(/\.md$/, ""))
+
+  return cachedSlugs
 }
 
 export function getEntryMetadata(slug: string): EntryMetadata | null {
+  if (cachedMetadata?.has(slug)) {
+    return cachedMetadata.get(slug)!
+  }
+
   const filePath = path.join(contentDirectory, `${slug}.md`)
   
   if (!fs.existsSync(filePath)) {
@@ -99,11 +119,18 @@ export function getEntryMetadata(slug: string): EntryMetadata | null {
   const summaryMatch = content.match(/^>\s*(.+?)(?:\n|$)/)
   const summary = summaryMatch ? summaryMatch[1] : ""
 
-  return {
+  const metadata: EntryMetadata = {
     slug,
     ...frontmatter,
     summary,
   }
+
+  if (!cachedMetadata) {
+    cachedMetadata = new Map()
+  }
+  cachedMetadata.set(slug, metadata)
+
+  return metadata
 }
 
 export function getAllEntriesMetadata(): EntryMetadata[] {
@@ -167,15 +194,110 @@ export async function getAllEntries(): Promise<Entry[]> {
     .sort((a, b) => b.year - a.year)
 }
 
+export function getEntriesByCategory(category: Category): EntryMetadata[] {
+  const allEntries = getAllEntriesMetadata()
+  return allEntries.filter((entry) => entry.category === category)
+}
+
+export function getEntriesByEra(era: string): EntryMetadata[] {
+  const allEntries = getAllEntriesMetadata()
+  return allEntries.filter((entry) => entry.era === era)
+}
+
+export function getEntriesByRegion(region: string): EntryMetadata[] {
+  const allEntries = getAllEntriesMetadata()
+  return allEntries.filter((entry) => entry.region === region)
+}
+
+export function getEntriesByTag(tag: string): EntryMetadata[] {
+  const allEntries = getAllEntriesMetadata()
+  return allEntries.filter((entry) => 
+    entry.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
+  )
+}
+
+export function getEntriesByYearRange(startYear: number, endYear: number): EntryMetadata[] {
+  const allEntries = getAllEntriesMetadata()
+  return allEntries.filter((entry) => 
+    entry.year >= startYear && entry.year <= endYear
+  )
+}
+
 export function getRelatedEntries(current: EntryMetadata, count = 3): EntryMetadata[] {
   const allEntries = getAllEntriesMetadata()
   
-  return allEntries
-    .filter(
-      (entry) =>
-        entry.slug !== current.slug &&
-        (entry.category === current.category ||
-          entry.tags.some((tag) => current.tags.includes(tag)))
-    )
+  const scored = allEntries
+    .filter((entry) => entry.slug !== current.slug)
+    .map((entry) => {
+      let score = 0
+      
+      if (entry.category === current.category) score += 3
+      
+      const sharedTags = entry.tags.filter((tag) => 
+        current.tags.includes(tag)
+      ).length
+      score += sharedTags * 2
+      
+      if (entry.era === current.era) score += 1
+      
+      if (entry.region === current.region) score += 1
+      
+      return { entry, score }
+    })
+    .sort((a, b) => b.score - a.score)
     .slice(0, count)
+    .map((item) => item.entry)
+
+  return scored
 }
+
+export function searchEntries(query: string): EntryMetadata[] {
+  const normalizedQuery = query.toLowerCase().trim()
+  if (!normalizedQuery) return []
+
+  const allEntries = getAllEntriesMetadata()
+  
+  return allEntries.filter((entry) => {
+    const searchableText = [
+      entry.title,
+      entry.summary,
+      entry.location,
+      entry.region,
+      ...entry.tags,
+      ...entry.key_figures,
+    ].join(" ").toLowerCase()
+
+    return searchableText.includes(normalizedQuery)
+  })
+}
+
+export function getStatistics() {
+  const allEntries = getAllEntriesMetadata()
+  
+  const categoryCount: Record<string, number> = {}
+  const eraCount: Record<string, number> = {}
+  const regionCount: Record<string, number> = {}
+  const tagCount: Record<string, number> = {}
+
+  for (const entry of allEntries) {
+    categoryCount[entry.category] = (categoryCount[entry.category] || 0) + 1
+    eraCount[entry.era] = (eraCount[entry.era] || 0) + 1
+    regionCount[entry.region] = (regionCount[entry.region] || 0) + 1
+    
+    for (const tag of entry.tags) {
+      tagCount[tag] = (tagCount[tag] || 0) + 1
+    }
+  }
+
+  return {
+    total: allEntries.length,
+    byCategory: categoryCount,
+    byEra: eraCount,
+    byRegion: regionCount,
+    byTag: tagCount,
+    avgImpactScore: allEntries.reduce((sum, e) => sum + e.impact_score, 0) / allEntries.length,
+    avgDifficultyScore: allEntries.reduce((sum, e) => sum + e.difficulty_score, 0) / allEntries.length,
+  }
+}
+
+export { clearCache }
