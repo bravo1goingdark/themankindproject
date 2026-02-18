@@ -1,0 +1,106 @@
+name: Process Contribution
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  process:
+    if: github.event.label.name == 'approved' && contains(github.event.issue.labels.*.name, 'contribution')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - name: Generate markdown
+        id: generate
+        run: |
+          # Extract and process the contribution
+          npx tsx scripts/process-issue.ts "${{ github.event.issue.number }}" "${{ github.event.issue.body }}" > contribution.md
+          
+          # Extract title for filename
+          echo "title=$(head -1 contribution.md | grep 'title:' | sed 's/title: //')" >> $GITHUB_OUTPUT
+
+      - name: Create content file
+        id: create
+        run: |
+          # Generate slug from title
+          title="${{ steps.generate.outputs.title }}"
+          slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+          
+          # Create content directory if it doesn't exist
+          mkdir -p content
+          
+          # Move the generated file
+          mv contribution.md "content/${slug}.md"
+          
+          echo "slug=$slug" >> $GITHUB_OUTPUT
+          echo "filename=content/${slug}.md" >> $GITHUB_OUTPUT
+
+      - name: Validate content
+        run: |
+          npx tsx scripts/validate-content.ts
+
+      - name: Build search index
+        run: |
+          npx tsx scripts/build-search-index.ts
+
+      - name: Create Pull Request
+        id: pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Add contribution: ${{ steps.generate.outputs.title }}"
+          title: "Add contribution: ${{ steps.generate.outputs.title }}"
+          body: |
+            This PR adds the contribution from issue #${{ github.event.issue.number }}.
+            
+            **Submitted by:** @${{ github.event.issue.user.login }}
+            
+            **Original issue:** ${{ github.event.issue.html_url }}
+            
+            **Content file:** `content/${{ steps.create.outputs.slug }}.md`
+            
+            Once merged, the issue will be closed automatically.
+          branch: add-contribution-${{ github.event.issue.number }}
+          base: main
+
+      - name: Comment on issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `✅ Thanks for your contribution! I've created a pull request to add this to the archive: ${{ steps.pr.outputs.pull-request-url }}`
+            });
+
+      - name: Close issue
+        if: steps.pr.outputs.pull-request-number
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.update({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed',
+              state_reason: 'completed'
+            });

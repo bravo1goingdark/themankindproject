@@ -3,7 +3,27 @@ import { validateSubmission, type ContributionSubmission } from "../lib/contribu
 const issueNumber = process.argv[2]
 const issueBody = process.argv[3]
 
-function parseIssueBody(body: string): Partial<ContributionSubmission> {
+function parseIssueBody(body: string): Partial<ContributionSubmission> | null {
+  // Try to extract JSON from code block (format used by contribute form)
+  const jsonMatch = body.match(/```json\s*([\s\S]*?)\s*```/)
+  if (jsonMatch) {
+    try {
+      const json = JSON.parse(jsonMatch[1])
+      return json
+    } catch {
+      // Fall through to try parsing the template format
+    }
+  }
+  
+  // Try to extract JSON from issue body without code block
+  try {
+    const json = JSON.parse(body)
+    return json
+  } catch {
+    // Fall through to try parsing template format
+  }
+  
+  // Parse the template format (### sections)
   const lines = body.split("\n")
   const data: Record<string, string | string[]> = {}
   let currentKey = ""
@@ -30,6 +50,11 @@ function parseIssueBody(body: string): Partial<ContributionSubmission> {
 
   if (currentKey && currentValue) {
     data[currentKey] = currentValue.trim()
+  }
+
+  // Only return if we found actual data
+  if (Object.keys(data).length === 0) {
+    return null
   }
 
   return {
@@ -61,6 +86,12 @@ function parseIssueBody(body: string): Partial<ContributionSubmission> {
 
 async function main() {
   const parsed = parseIssueBody(issueBody)
+  
+  if (!parsed) {
+    console.log("Could not parse issue body. Expected JSON in a code block or template format.")
+    process.exit(1)
+  }
+  
   const { valid, errors } = validateSubmission(parsed)
 
   if (!valid) {
