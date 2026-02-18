@@ -29,8 +29,11 @@ jobs:
       - name: Generate markdown
         id: generate
         run: |
+          # Write issue body to file to avoid shell escaping issues
+          echo "${{ github.event.issue.body }}" > issue_body.txt
+          
           # Extract and process the contribution
-          npx tsx scripts/process-issue.ts "${{ github.event.issue.number }}" "${{ github.event.issue.body }}" > contribution.md
+          npx tsx scripts/process-issue.ts "${{ github.event.issue.number }}" issue_body.txt > contribution.md
           
           # Extract title for filename
           echo "title=$(head -1 contribution.md | grep 'title:' | sed 's/title: //')" >> $GITHUB_OUTPUT

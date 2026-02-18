@@ -1,10 +1,10 @@
 import { contributionToMarkdown } from "./contribution-to-markdown"
 import type { ContributionSubmission } from "../lib/contribution-schema"
 import * as fs from "fs"
-import * as path from "path"
 
 const issueNumber = process.argv[2]
-const issueBody = process.argv[3]
+const issueBodyPath = process.argv[3]
+const issueBody = issueBodyPath ? fs.readFileSync(issueBodyPath, 'utf-8') : process.argv[3]
 
 function parseIssueBody(body: string): Partial<ContributionSubmission> | null {
   // Try to extract JSON from code block (format used by contribute form)
@@ -23,7 +23,67 @@ function parseIssueBody(body: string): Partial<ContributionSubmission> | null {
     const json = JSON.parse(body)
     return json
   } catch {
+    // Fall through to template format
+  }
+  
+  // Parse the template format (### sections)
+  const lines = body.split("\n")
+  const data: Record<string, string | string[]> = {}
+  let currentKey = ""
+  let currentValue = ""
+  let inMultiline = false
+
+  for (const line of lines) {
+    if (line.startsWith("### ")) {
+      if (currentKey && currentValue) {
+        data[currentKey] = currentValue.trim()
+      }
+      currentKey = line.replace("### ", "").toLowerCase().replace(/ /g, "_")
+      currentValue = ""
+      inMultiline = false
+    } else if (line.trim() === "") {
+      if (currentValue && !inMultiline) {
+        data[currentKey] = currentValue.trim()
+      }
+    } else {
+      currentValue += (currentValue ? "\n" : "") + line
+      inMultiline = true
+    }
+  }
+
+  if (currentKey && currentValue) {
+    data[currentKey] = currentValue.trim()
+  }
+
+  // Only return if we found actual data
+  if (Object.keys(data).length === 0) {
     return null
+  }
+
+  return {
+    title: data.title as string,
+    category: data.category as ContributionSubmission["category"],
+    era: data.era as string,
+    year: parseInt(data.year as string, 10),
+    date: data.date as string,
+    region: data.region as string,
+    location: data.location as string,
+    key_figures: (data.key_figures as string)?.split(",").map((s) => s.trim()) || [],
+    summary: data.summary as string,
+    context: data.context as string,
+    the_deed: data.the_deed as string,
+    why_it_matters: data.why_it_matters as string,
+    brutal_truth: data.brutal_truth as string,
+    numbers: (data.numbers as string)?.split("\n").filter(Boolean) || [],
+    impact: data.impact as string,
+    impact_score: parseInt(data.impact_score as string, 10) || 50,
+    difficulty_score: parseInt(data.difficulty_score as string, 10) || 50,
+    tags: (data.tags as string)?.split(",").map((s) => s.trim()) || [],
+    image: data.image as string,
+    sources: (data.sources as string)?.split("\n").filter(Boolean) || [],
+    submitter_name: data.submitter_name as string,
+    submitter_email: data.submitter_email as string,
+    submitted_at: new Date().toISOString(),
   }
 }
 
