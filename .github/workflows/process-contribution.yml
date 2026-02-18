@@ -26,31 +26,26 @@ jobs:
 
       - run: pnpm install
 
+      - name: Write issue body to file
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            fs.writeFileSync('issue_body.txt', `${{ github.event.issue.body }}`);
+
       - name: Generate markdown
         id: generate
         run: |
-          # Write issue body to file to avoid shell escaping issues
-          echo "${{ github.event.issue.body }}" > issue_body.txt
-          
-          # Extract and process the contribution
           npx tsx scripts/process-issue.ts "${{ github.event.issue.number }}" issue_body.txt > contribution.md
-          
-          # Extract title for filename
           echo "title=$(head -1 contribution.md | grep 'title:' | sed 's/title: //')" >> $GITHUB_OUTPUT
 
       - name: Create content file
         id: create
         run: |
-          # Generate slug from title
           title="${{ steps.generate.outputs.title }}"
           slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
-          
-          # Create content directory if it doesn't exist
           mkdir -p content
-          
-          # Move the generated file
           mv contribution.md "content/${slug}.md"
-          
           echo "slug=$slug" >> $GITHUB_OUTPUT
           echo "filename=content/${slug}.md" >> $GITHUB_OUTPUT
 
