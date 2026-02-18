@@ -1,5 +1,7 @@
 import type { Category } from "./content-types"
 
+export const GITHUB_REPO = "bravo1goingdark/themankindproject"
+
 export const CATEGORY_COLORS: Record<Category, { badge: string; bar: string }> = {
   science: {
     badge: "bg-blue-500/10 text-blue-400 border-blue-500/20",
