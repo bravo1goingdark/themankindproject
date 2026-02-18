@@ -23,6 +23,10 @@ export const CATEGORY_COLORS: Record<Category, { badge: string; bar: string }> =
     badge: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
     bar: "bg-cyan-400",
   },
+  war: {
+    badge: "bg-red-500/10 text-red-400 border-red-500/20",
+    bar: "bg-red-400",
+  },
 }
 
 export const CATEGORY_DOT_COLORS: Record<Category, string> = {
@@ -31,6 +35,7 @@ export const CATEGORY_DOT_COLORS: Record<Category, string> = {
   courage: "bg-rose-500",
   medicine: "bg-emerald-500",
   exploration: "bg-cyan-500",
+  war: "bg-red-500",
 }
 
 export function formatYear(year: number): string {
