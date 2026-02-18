@@ -15,15 +15,21 @@ export function AchievementGrid({ entries }: AchievementGridProps) {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null)
 
   const filtered = useMemo(() => {
+    const searchLower = search.toLowerCase().trim()
+    
     return entries.filter((entry) => {
       const matchesSearch =
         search.length === 0 ||
-        entry.title.toLowerCase().includes(search.toLowerCase()) ||
-        entry.summary.toLowerCase().includes(search.toLowerCase()) ||
+        entry.title.toLowerCase().includes(searchLower) ||
+        entry.summary.toLowerCase().includes(searchLower) ||
+        entry.category.toLowerCase().includes(searchLower) ||
+        entry.region.toLowerCase().includes(searchLower) ||
+        entry.location.toLowerCase().includes(searchLower) ||
+        entry.era.toLowerCase().includes(searchLower) ||
         entry.key_figures.some((f) =>
-          f.toLowerCase().includes(search.toLowerCase())
+          f.toLowerCase().includes(searchLower)
         ) ||
-        entry.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
+        entry.tags.some((t) => t.toLowerCase().includes(searchLower))
 
       const matchesCategory =
         activeCategory === null || entry.category === activeCategory
