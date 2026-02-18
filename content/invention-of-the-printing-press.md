@@ -17,6 +17,7 @@ tags:
   - Renaissance
   - literacy
   - information
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Pages_from_the_Gutenberg_Bible%2C_1455-_the_1st_pages_of_the_Gospels_and_the_beginning_of_the_Sermon_on_the_Mount-_Matthew_5-1_LCCN2007675536.jpg/976px-Pages_from_the_Gutenberg_Bible%2C_1455-_the_1st_pages_of_the_Gospels_and_the_beginning_of_the_Sermon_on_the_Mount-_Matthew_5-1_LCCN2007675536.jpg
 ---
 
 > Movable type made knowledge accessible to the masses, igniting the Renaissance and Reformation.

@@ -19,6 +19,7 @@ tags:
   - NASA
   - planetary science
   - Golden Record
+image: https://gizmodo.com/app/uploads/2019/11/cv2vseo7dvwrtbiuh2ws.jpg
 ---
 
 > Two spacecraft launched in 1977 that became humanity's farthest-reaching emissaries to the cosmos.

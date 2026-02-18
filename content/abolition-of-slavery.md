@@ -20,6 +20,7 @@ tags:
   - civil rights
   - emancipation
   - justice
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Emancipation_proclamation.jpg/1280px-Emancipation_proclamation.jpg
 ---
 
 > A centuries-long struggle for human dignity that reshaped societies across the globe.

@@ -9,13 +9,12 @@ export const metadata: Metadata = {
 
 export default function ContributePage() {
   return (
-    <div className="mx-auto max-w-2xl px-6 pt-16 pb-24">
-      <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl text-balance">
+    <div className="mx-auto max-w-4xl px-6 pt-12 pb-20">
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground">
         Contribute
       </h1>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-        Know of an achievement that belongs here? Suggest it below. All
-        submissions are reviewed before being added to the archive.
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        Submit an achievement for review. Required sections marked with *
       </p>
       <ContributeForm />
     </div>

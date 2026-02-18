@@ -18,6 +18,7 @@ tags:
   - WHO
   - public health
   - epidemiology
+image: https://www.cdc.gov/smallpox/media/images/2024/10/Smallpox-Eradication-Map.PNG
 ---
 
 > The only human disease ever deliberately eradicated, saving millions of lives each year.

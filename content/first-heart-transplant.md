@@ -18,6 +18,7 @@ tags:
   - transplant
   - cardiac
   - medical breakthrough
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Christiaan_Barnard_1969.jpg/622px-Christiaan_Barnard_1969.jpg
 ---
 
 > A surgical milestone that proved the human heart could be replaced, opening a new era in medicine.

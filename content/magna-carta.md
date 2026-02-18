@@ -19,6 +19,7 @@ tags:
   - democracy
   - rights
   - constitution
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Magna_Carta_%28British_Library_Cotton_MS_Augustus_II.106%29.jpg/1280px-Magna_Carta_%28British_Library_Cotton_MS_Augustus_II.106%29.jpg
 ---
 
 > A medieval charter that established the principle that even kings must obey the law.

@@ -19,6 +19,7 @@ tags:
   - NASA
   - Apollo 11
   - Cold War
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Aldrin_Apollo_11.jpg/1280px-Aldrin_Apollo_11.jpg
 ---
 
 > Humanity's first steps on another world, marking the pinnacle of the Space Race.

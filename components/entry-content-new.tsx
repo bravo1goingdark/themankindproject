@@ -15,7 +15,12 @@ import {
   ChevronRight,
   Flame,
   BarChart3,
+  ExternalLink,
 } from "lucide-react"
+
+function getWikipediaUrl(name: string): string {
+  return `https://en.wikipedia.org/wiki/${encodeURIComponent(name.replace(/ /g, "_"))}`
+}
 
 export function EntryContent({
   entry,
@@ -27,14 +32,24 @@ export function EntryContent({
   return (
     <article>
       <div className="relative h-56 w-full overflow-hidden sm:h-72 md:h-80">
-        <Image
-          src="/images/entry-hero.jpg"
-          alt=""
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background" />
+        {entry.image ? (
+          <>
+            <Image
+              src={entry.image}
+              alt={entry.title}
+              fill
+              className="object-cover"
+              priority
+              sizes="100vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-background">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/15 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background" />
+          </div>
+        )}
         <div className="absolute bottom-0 left-0 w-full px-6 pb-8 lg:px-0">
           <div className="mx-auto max-w-5xl">
             <Link
@@ -144,14 +159,19 @@ export function EntryContent({
               <SidebarCard title="People Involved">
                 <ul className="flex flex-col gap-2">
                   {entry.key_figures.map((person) => (
-                    <li
-                      key={person}
-                      className="flex items-center gap-2 text-sm text-foreground/80"
-                    >
-                      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-muted-foreground uppercase">
-                        {person.charAt(0)}
-                      </span>
-                      {person}
+                    <li key={person}>
+                      <a
+                        href={getWikipediaUrl(person)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-foreground/80 transition-colors hover:text-accent group"
+                      >
+                        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-muted-foreground uppercase">
+                          {person.charAt(0)}
+                        </span>
+                        <span className="flex-1">{person}</span>
+                        <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </a>
                     </li>
                   ))}
                 </ul>

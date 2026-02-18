@@ -20,6 +20,7 @@ tags:
   - molecular biology
   - Nobel Prize
   - Cambridge
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/DNA_Model_Crick-Watson.jpg/960px-DNA_Model_Crick-Watson.jpg
 ---
 
 > The double helix model unveiled the molecular blueprint of life itself.

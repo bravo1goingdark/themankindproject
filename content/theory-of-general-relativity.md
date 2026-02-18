@@ -18,6 +18,7 @@ tags:
   - gravity
   - spacetime
   - Nobel Prize
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Albert_Einstein_%28Nobel%29.png/396px-Albert_Einstein_%28Nobel%29.png
 ---
 
 > Einstein's revolutionary framework redefined our understanding of gravity, space, and time.

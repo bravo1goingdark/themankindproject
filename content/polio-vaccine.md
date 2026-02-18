@@ -18,6 +18,7 @@ tags:
   - public health
   - virology
   - children
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/PittPolioVaccineCoL.jpg/330px-PittPolioVaccineCoL.jpg
 ---
 
 > A breakthrough that nearly eliminated a terrifying disease that paralyzed thousands of children each year.

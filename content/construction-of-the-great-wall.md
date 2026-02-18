@@ -18,6 +18,7 @@ tags:
   - China
   - fortification
   - ancient
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Great_Wall_of_China_July_2006.JPG/1280px-Great_Wall_of_China_July_2006.JPG
 ---
 
 > A monumental feat of ancient engineering stretching over 13,000 miles across northern China.

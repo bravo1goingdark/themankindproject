@@ -18,6 +18,7 @@ tags:
   - flight
   - invention
   - Kitty Hawk
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Wright_First_Flight_1903Dec17_%28full_restore_115%29.jpg/1280px-Wright_First_Flight_1903Dec17_%28full_restore_115%29.jpg
 ---
 
 > Twelve seconds that changed the world and made the sky a frontier for all of humanity.

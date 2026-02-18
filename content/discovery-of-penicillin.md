@@ -19,6 +19,7 @@ tags:
   - microbiology
   - World War II
   - Nobel Prize
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Sir_Alexander_Fleming%2C_Frs%2C_the_Discoverer_of_Penicillin_Art.IWMARTLD4217.jpg/800px-Sir_Alexander_Fleming%2C_Frs%2C_the_Discoverer_of_Penicillin_Art.IWMARTLD4217.jpg
 ---
 
 > An accidental observation that launched the age of antibiotics and saved countless lives.

@@ -19,6 +19,7 @@ tags:
   - biotechnology
   - DNA
   - international cooperation
+image: https://upload.wikimedia.org/wikipedia/commons/e/eb/Genetic_Variation.jpg
 ---
 
 > A 13-year international effort that mapped every gene in the human body.
